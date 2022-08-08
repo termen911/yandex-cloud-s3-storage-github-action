@@ -2,7 +2,7 @@
 
 function usage_docs {
   echo ""
-  echo "- uses: keithweaver/aws-s3-github-action@v1.0.0"
+  echo "- uses: termen911/yandex-cloud-s3-storage-github-action@v0.0.1"
   echo "  with:"
   echo "    command: cp"
   echo "    source: ./local_file.txt"
@@ -26,13 +26,6 @@ function get_configuration_settings {
     aws configure set aws_secret_access_key "$INPUT_AWS_SECRET_ACCESS_KEY"
   fi
 
-  if [ -z "$INPUT_AWS_SESSION_TOKEN" ]
-  then
-    echo "AWS Session Token was not found. Using configuration from previous step."
-  else
-    aws configure set aws_session_token "$INPUT_AWS_SESSION_TOKEN"
-  fi
-
   if [ -z "$INPUT_METADATA_SERVICE_TIMEOUT" ]
   then
     echo "Metadata service timeout was not found. Using configuration from previous step."
@@ -40,12 +33,7 @@ function get_configuration_settings {
     aws configure set metadata_service_timeout "$INPUT_METADATA_SERVICE_TIMEOUT"
   fi
 
-  if [ -z "$INPUT_AWS_REGION" ]
-  then
-    echo "AWS region not found. Using configuration from previous step."
-  else
-    aws configure set region "$INPUT_AWS_REGION"
-  fi
+  aws configure set region "ru-central1"
 }
 function get_command {
   VALID_COMMANDS=("sync" "mb" "rb" "ls" "cp" "mv" "rm")
@@ -111,13 +99,15 @@ function main {
 
   aws --version
 
+  ENDPOINT_APPEND="--endpoint-url=https://storage.yandexcloud.net"
+
   if [ "$COMMAND" == "cp" ] || [ "$COMMAND" == "mv" ] || [ "$COMMAND" == "sync" ]
   then
-    echo aws s3 $COMMAND "$INPUT_SOURCE" "$INPUT_DESTINATION" $INPUT_FLAGS
-    aws s3 "$COMMAND" "$INPUT_SOURCE" "$INPUT_DESTINATION" $INPUT_FLAGS
+    echo aws ${ENDPOINT_APPEND} s3 $COMMAND "$INPUT_SOURCE" "$INPUT_DESTINATION" $INPUT_FLAGS
+    aws "${ENDPOINT_APPEND}" s3 "$COMMAND" "$INPUT_SOURCE" "$INPUT_DESTINATION" $INPUT_FLAGS
   else
-    echo aws s3 $COMMAND "$INPUT_SOURCE" $INPUT_FLAGS
-    aws s3 "$COMMAND" "$INPUT_SOURCE" $INPUT_FLAGS
+    echo aws ${ENDPOINT_APPEND} s3 $COMMAND "$INPUT_SOURCE" $INPUT_FLAGS
+    aws "${ENDPOINT_APPEND}" s3 "$COMMAND" "$INPUT_SOURCE" $INPUT_FLAGS
   fi
 }
 
